@@ -1,0 +1,66 @@
+# This script takes a vcf file as argument
+
+### Part 1: load and format data
+
+# get arguments from the script
+# "trailingonly = T" makes sure only user-specified arguments are used
+args <- commandArgs(trailingOnly = T)
+# get the name of the vcf from the first given argument
+vcf_name <- args[1]
+
+# Install or load required packages
+# packages <- c("vcfR")
+# install.packages(setdiff(packages, rownames(installed.packages())), repos = "http://cran.us.r-project.org")
+library(vcfR)
+
+# load the vcf file in R
+vcf <- read.vcfR(vcf_name)
+
+# Extract genotype information
+gt <- extract.gt(vcf, "GT")
+
+# Extract overall locus depth information (two alleles summed)
+dp <- extract.gt(vcf, "DP", as.numeric = T)
+
+# Extract allelic depth at the reference allele
+ad.ref <- extract.gt(vcf, "AD", as.numeric = T) # takes only the first one
+
+# Remove coverage info at SNPs where a SNP wasn't called because of too low coverage.
+ad.ref[which(dp < 8)] <- NA
+ad.ref[which(is.na(dp))] <- NA
+
+# Compute allelic depth at the alternative allele
+# 
+ad.alt <- dp - ad.ref
+
+# create the new gt for haploid genotypes and temporarily fill with NA (coded as "." in vcf format)
+hap.gt <-matrix(data = ".", nrow = dim(gt)[[1]], ncol = dim(gt)[[2]])
+
+# create the new dp for haploid genotypes and temporarily fill with NA
+hap.dp <- hap.gt
+
+# assign reference allele genotype to alleles where 
+# allelic depth at the reference allele is higher than the alternative allele
+hap.gt[which(ad.ref > ad.alt)] <- "0"
+
+# assign alternative allele genotype to alleles where 
+# allelic depth at the reference allele is lower than the alternative allele
+hap.gt[which(ad.ref < ad.alt)] <- "1"
+
+# assign a random  genotype to alleles where 
+# allelic depth at the reference allele is equal to the alternative allele
+hap.gt[which(ad.ref == ad.alt)] <- sample(c("0", "1"), 1)
+
+# assign allelic depth of the reference allele as locus depth
+# where the reference allele was retained
+hap.dp[which(hap.gt == "0")] <- ad.ref[which(hap.gt == "0")]
+
+# assign allelic depth of the alternative allele as locus depth
+# where the alternative allele was retained
+hap.dp[which(hap.gt == "1")] <- ad.alt[which(hap.gt == "1")]
+
+hap.vcf <- vcf
+hap.vcf@gt[,1] <- "GT:DP"
+hap.vcf@gt[,-1] <- paste(hap.gt, hap.dp, sep=":")
+
+write.vcf(hap.vcf, paste0("haploid", vcf_name))
