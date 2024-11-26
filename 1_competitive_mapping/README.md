@@ -5,7 +5,7 @@
 
 ## Map individuals to concatenated genome
 ` bwa index cat_gen.fasta `  
-` bwa mem -t 20 cat_gen.fasta $READ.fq.gz| samtools sort --output-fmt=SAM --threads 20 | samtools view --no-header -o catgen_$READ.sam - `  
+` bwa mem -t 20 cat_gen.fasta $READ.fq.gz| samtools sort --output-fmt=SAM --threads 20 | samtools view --no-header -o ./sam/catgen_$READ.sam - `  
 
 ## Identify reads that did map to *Lasius*
 ` Rscript filtercontaminates.r `
