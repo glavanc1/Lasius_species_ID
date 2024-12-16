@@ -1,8 +1,7 @@
 # Lasius_species_ID
 
 **Decontaminating genomic data for accurate species delineation and hybrid detection in the *Lasius* ant genus**   
-Kristine Jecha, Guillaume Lavanchy,Tanja Schwander  
-https://doi.org/10.1101/2024.11.27.625433 
+
 
 - Scripts used for the competitive mapping of Lasius RADseq reads to eliminate contamination can be found in `/1_competitive_mapping`  
   
