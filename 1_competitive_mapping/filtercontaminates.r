@@ -1,6 +1,6 @@
 #This script takes an input of a folder titled "sam" containing .sam.gz files for each sample after mapping to the concatenated genome
 
-YOURDIR <- "/scratch/kjecha/Lasi/"
+YOURDIR <- "/scratch/Lasi/"
 setwd(paste(YOURDIR, "/sam", sep = ""))
 library(dplyr)
 library(ggplot2)
